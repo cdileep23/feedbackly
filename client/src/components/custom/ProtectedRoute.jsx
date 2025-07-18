@@ -17,7 +17,6 @@ const ProtectedRoute = () => {
   const user = useSelector((store) => store.user);
   const isAuthRoute = location.pathname.startsWith("/auth");
 
-  const [loading, setLoading] = useState(true); 
 
   const fetchUser = async () => {
     try {
@@ -32,28 +31,15 @@ const ProtectedRoute = () => {
     } catch (error) {
       if (!isAuthRoute) navigate("/auth");
       console.log(error)
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {
     if (!user) {
       fetchUser();
-    } else {
-      setLoading(false);
-    }
+    } 
   }, [user]);
-if (loading) {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-       
-      </div>
-    </div>
-  );
-}
+
   return (
     <div>
       <Header />

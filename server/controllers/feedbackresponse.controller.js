@@ -1,8 +1,7 @@
 
-import FeedbackResponseModel from "../models/FeedbackResponseModel.js";
-import FeedbackModel from "../models/FeedbackModel.js";
+import FeedbackResponseModel from '../models/feedbackresponse.model.js'
 import mongoose from "mongoose";
-
+import FeedbackModel from "../models/feedback.model.js";
 
 export const submitFeedbackResponse = async (req, res) => {
   try {
@@ -111,7 +110,7 @@ export const submitFeedbackResponse = async (req, res) => {
   } catch (error) {
     console.error("Error submitting feedback response:", error);
 
-    // Handle duplicate key error
+    
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,

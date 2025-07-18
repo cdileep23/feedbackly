@@ -8,6 +8,7 @@ import { Provider } from "react-redux";
 import appStore from "./store/store";
 import { Toaster } from "./components/ui/sonner";
 import ProtectedRoute from "./components/custom/ProtectedRoute";
+import AdminEachForm from "./Pages/AdminEachForm";
 
 
 const App = () => {
@@ -35,6 +36,10 @@ const App = () => {
           path: "dashboard",
           element: <AdminDashboard />,
         },
+        {
+          path:'form/:formId',
+          element:<AdminEachForm/>
+        }
       ],
     },
   ]);

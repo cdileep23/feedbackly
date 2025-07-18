@@ -126,7 +126,7 @@ export const Login = async (req, res) => {
 
 export const UserProfile = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.id;
     const user = await adminModel.findById(userId).select("-password");
 
     return res.status(200).json({

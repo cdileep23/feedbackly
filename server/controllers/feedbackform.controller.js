@@ -1,4 +1,5 @@
 import FeedbackModel from "../models/feedback.model.js";
+import FeedbackResponseModel from '../models/feedbackresponse.model.js'
 import mongoose from "mongoose";
 const validateQuestionType = (questionType) => {
   const validTypes = ["text", "mcq", "yesno"];
@@ -121,8 +122,8 @@ const validateFormData = (formData) => {
 
 export const createFeedbackForm = async (req, res) => {
   try {
-    const { adminId, title, description, questions, expiresAt } = req.body;
-
+    const {  title, description, questions, expiresAt } = req.body;
+const adminId=req.user.id
     if (!adminId || !mongoose.Types.ObjectId.isValid(adminId)) {
       return res.status(400).json({
         success: false,
@@ -425,25 +426,14 @@ export const getFeedbackForm = async (req, res) => {
   }
 };
 
-
 export const getAdminFeedbackForms = async (req, res) => {
   try {
-    const { adminId } = req.params;
-    const { page = 1, limit = 10, isActive, search } = req.query;
+    const adminId = req.user.id;
+    const { page = 1, limit = 10, search } = req.query;
 
-    if (!adminId || !mongoose.Types.ObjectId.isValid(adminId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Valid admin ID is required",
-      });
-    }
+    console.log(adminId);
 
-    // Build query
-    const query = { adminId };
-
-    if (isActive !== undefined) {
-      query.isActive = isActive === "true";
-    }
+    let query = { adminId };
 
     if (search) {
       query.$or = [
@@ -452,13 +442,12 @@ export const getAdminFeedbackForms = async (req, res) => {
       ];
     }
 
-    // Execute query with pagination
     const skip = (page - 1) * limit;
     const feedbackForms = await FeedbackModel.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .select("title description isActive expiresAt createdAt questions");
+      .select("_id title description isActive createdAt"); 
 
     const totalCount = await FeedbackModel.countDocuments(query);
 
@@ -477,6 +466,124 @@ export const getAdminFeedbackForms = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching admin feedback forms:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getFormAnalyticsForAdmin = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { formId } = req.params;
+
+    // Validate formId
+    if (!mongoose.Types.ObjectId.isValid(formId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid form ID format",
+      });
+    }
+
+    // Get form with all details
+    const form = await FeedbackModel.findById(formId).lean();
+    if (!form) {
+      return res.status(404).json({
+        success: false,
+        message: "Form not found",
+      });
+    }
+
+    // Verify admin ownership
+    if (form.adminId.toString() !== adminId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access to form data",
+      });
+    }
+
+    // Get all responses
+    const responses = await FeedbackResponseModel.find(
+      { feedbackFormId: formId },
+      { __v: 0 }
+    ).lean();
+
+    const totalResponses = responses.length;
+
+    // Prepare form details without questions
+    const formDetails = {
+      title: form.title,
+      description: form.description,
+      isActive: form.isActive,
+      createdAt: form.createdAt,
+      expiresAt: form.expiresAt,
+      totalResponses: totalResponses,
+    };
+
+    // Filter only MCQ and Yes/No questions and prepare analytics
+    const mcqYesNoAnalytics = form.questions
+      .filter((q) => q.questionType === "mcq" || q.questionType === "yesno")
+      .map((question) => {
+        const questionResponses = responses
+          .map(
+            (response) =>
+              response.responses.find(
+                (r) => r.questionText === question.questionText
+              )?.answer
+          )
+          .filter(Boolean);
+
+        const options =
+          question.questionType === "mcq" ? question.options : ["Yes", "No"];
+
+        return {
+          questionText: question.questionText,
+          questionType: question.questionType,
+          options: options.map((option) => {
+            const count = questionResponses.filter((r) =>
+              question.questionType === "mcq"
+                ? r === option
+                : r.toLowerCase() === option.toLowerCase()
+            ).length;
+
+            return {
+              option,
+              count,
+              percentage:
+                totalResponses > 0
+                  ? Math.round((count / totalResponses) * 100)
+                  : 0,
+            };
+          }),
+          totalAnswers: questionResponses.length,
+          responseRate:
+            totalResponses > 0
+              ? Math.round((questionResponses.length / totalResponses) * 100)
+              : 0,
+        };
+      });
+
+    // Prepare all responses in simple format
+    const allResponses = responses.map((response) => ({
+      submittedBy: response.submittedBy || "Anonymous",
+      submittedAt: response.submittedAt,
+      answers: response.responses.map((r) => ({
+        questionText: r.questionText,
+        answer: r.answer,
+      })),
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        formDetails,
+        analytics: mcqYesNoAnalytics,
+        allResponses,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching form analytics:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -505,7 +612,7 @@ export const deleteFeedbackForm = async (req, res) => {
       });
     }
 
-    if (form.createdBy.toString() !== userId) {
+    if (form.adminId.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: "You are not authorized to delete this form",

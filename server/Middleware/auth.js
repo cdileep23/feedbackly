@@ -23,7 +23,7 @@ export const IsAuthenticated = async (req, res, next) => {
       });
     }
 
-    req.userId = decoded.userId;
+    req.user =user;
 
     next();
   } catch (error) {

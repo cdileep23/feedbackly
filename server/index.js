@@ -1,6 +1,7 @@
 import express from "express"
 import AdminRouter from "./routes/admin.route.js"
 import FeedbackFormRouter from "./routes/feedbackform.route.js"
+import responseRouter from './routes/feedbackresponse.route.js'
 import dotenv from "dotenv"
 import connectDB from "./db.js"
 import cookieParser from "cookie-parser"
@@ -18,6 +19,7 @@ app.use(
 );
 app.use('/api/v1/admin', AdminRouter)
 app.use("/api/v1/feedback", FeedbackFormRouter);
+app.use("/api/v1/response", responseRouter);
 app.use("/", (req, res) => {
   res.send("Hello from Backed");
 });

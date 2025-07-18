@@ -12,23 +12,23 @@ const Header = () => {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-
+const verifyAuth = async () => {
+  try {
+    const res = await axios.get(`${BASE_URL}/admin/profile`, {
+      withCredentials: true,
+    });
+console.log(res)
+    if (res.data?.success) {
+      dispatch(UserLoggedIn(res.data.user));
+    }
+  } catch (error) {
+    console.log("Auth verification failed", error);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
-    const verifyAuth = async () => {
-      try {
-        const res = await axios.get(`${BASE_URL}/admin/profile`, {
-          withCredentials: true,
-        });
-
-        if (res.data?.success) {
-          dispatch(UserLoggedIn(res.data.user));
-        }
-      } catch (error) {
-        console.log("Auth verification failed", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    
 
     if (!user) {
       verifyAuth();
@@ -36,6 +36,12 @@ const Header = () => {
       setLoading(false);
     }
   }, [dispatch, user]);
+
+
+  useEffect(()=>{
+verifyAuth()
+  },[])
+
 
   const handleLogout = async () => {
     try {
