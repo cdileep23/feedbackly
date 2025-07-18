@@ -1,21 +1,21 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const feedbackFormSchema = new mongoose.Schema({
   adminId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "admin",
     required: true,
   },
   title: {
     type: String,
     required: true,
     trim: true,
-    maxlength: 200,
+    maxlength: 50,
   },
   description: {
     type: String,
     trim: true,
-    maxlength: 1000,
+    maxlength: 200,
   },
   questions: [
     {
@@ -48,10 +48,7 @@ const feedbackFormSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
       },
-      order: {
-        type: Number,
-        default: 0,
-      },
+     
     },
   ],
   isActive: {
