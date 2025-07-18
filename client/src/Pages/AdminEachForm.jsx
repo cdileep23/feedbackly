@@ -23,6 +23,56 @@ import {
 } from "recharts";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+
+
+ const exportResponsesToExcel = (allResponses,title) => {
+  if (!allResponses || allResponses.length === 0) return;
+
+
+  const questionHeaders = allResponses[0].answers.map((q) => q.questionText);
+
+
+  const headers = ["Submitted By", "Submitted At", ...questionHeaders];
+
+  // Prepare rows
+  const dataRows = allResponses.map((response) => {
+    const base = [
+      response.submittedBy,
+      new Date(response.submittedAt).toLocaleString(),
+    ];
+
+    const answers = questionHeaders.map((question) => {
+      const found = response.answers.find((a) => a.questionText === question);
+      return found ? found.answer : "";
+    });
+
+    return [...base, ...answers];
+  });
+
+
+  const worksheetData = [headers, ...dataRows];
+
+ 
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Responses");
+
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const fileBlob = new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(fileBlob, `${title}_Form_Responses.xlsx`);
+};
+
 
 const AdminEachForm = () => {
   const { formId } = useParams();
@@ -30,8 +80,11 @@ const AdminEachForm = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFormActive, setIsFormActive] = useState(false); // Separate state for form status
-
+  const [isFormActive, setIsFormActive] = useState(false); 
+const[currentPage,setCurrentPage]=useState(1);
+const totalResponses = analyticsData?.allResponses.length;
+const limitPerPage=3;
+const NoOfPages = Math.ceil(totalResponses / limitPerPage);
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -42,6 +95,7 @@ const AdminEachForm = () => {
             withCredentials: true,
           }
         );
+        console.log(response.data.data);
         setAnalyticsData(response.data.data);
         setIsFormActive(response.data.data.formDetails.isActive); // Initialize status state
       } catch (err) {
@@ -67,7 +121,7 @@ const AdminEachForm = () => {
 
       if (res.data?.success) {
         toast.success(res.data?.message);
-        // Update the local analytics data to reflect the change
+        
         setAnalyticsData((prev) => ({
           ...prev,
           formDetails: {
@@ -77,7 +131,7 @@ const AdminEachForm = () => {
         }));
       }
     } catch (error) {
-      // Revert on error
+  
       setIsFormActive(!isFormActive);
       toast.error(error.response?.data?.message || "Failed to update status");
       console.error(error);
@@ -132,7 +186,13 @@ const AdminEachForm = () => {
         <div className="flex gap-4 text-sm text-gray-500">
           <span>
             Status:{" "}
-            <span className={isFormActive ? "text-green-500 font-semibold" : "text-red-500 font-semibold"}>
+            <span
+              className={
+                isFormActive
+                  ? "text-green-500 font-semibold"
+                  : "text-red-500 font-semibold"
+              }
+            >
               {isFormActive ? "Active" : "Inactive"}
             </span>
           </span>
@@ -209,38 +269,85 @@ const AdminEachForm = () => {
 
       {/* Responses Section with Accordion */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">
-          All Responses ({analyticsData.allResponses.length})
-        </h2>
+        <div className="flex justify-between ">
+          <h2 className="text-xl font-semibold mb-4">
+            All Responses ({analyticsData.allResponses.length})
+          </h2>
+          {analyticsData?.allResponses && (
+            <Button
+              onClick={() => {
+                exportResponsesToExcel(
+                  analyticsData?.allResponses,
+                  analyticsData.formDetails.title
+                );
+              }}
+            >
+              Download Xlsx
+            </Button>
+          )}
+        </div>
+
         {analyticsData.allResponses.length > 0 ? (
-          <Accordion type="single" collapsible className="w-full">
-            {analyticsData.allResponses.map((response, idx) => (
-              <AccordionItem key={idx} value={`item-${idx}`}>
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex justify-between w-full pr-4">
-                    <span className="font-medium">
-                      Response #{idx + 1} - {response.submittedBy}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {new Date(response.submittedAt).toLocaleString()}
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4 p-2">
-                    {response.answers.map((answer, ansIdx) => (
-                      <div key={ansIdx} className="text-sm">
-                        <p className="font-medium">{answer.questionText}</p>
-                        <p className="text-gray-600 mt-1 pl-4">
-                          {answer.answer}
-                        </p>
+          <>
+            {" "}
+            <Accordion type="single" collapsible className="w-full">
+              {analyticsData.allResponses
+                .slice(
+                  (currentPage - 1) * limitPerPage,
+                  currentPage * limitPerPage
+                )
+
+                .map((response, idx) => (
+                  <AccordionItem key={idx} value={`item-${idx}`}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex justify-between w-full pr-4">
+                        <span className="font-medium">
+                          Response #{idx + 1} - {response.submittedBy}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {new Date(response.submittedAt).toLocaleString()}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4 p-2">
+                        {response.answers.map((answer, ansIdx) => (
+                          <div key={ansIdx} className="text-sm">
+                            <p className="font-medium">{answer.questionText}</p>
+                            <p className="text-gray-600 mt-1 pl-4">
+                              {answer.answer}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+            </Accordion>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <Button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                variant="outline"
+              >
+                {"<"}
+              </Button>
+
+              <p>
+                Page {currentPage} of {NoOfPages}
+              </p>
+
+              <Button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, NoOfPages))
+                }
+                disabled={currentPage === NoOfPages}
+                variant="outline"
+              >
+                {">"}
+              </Button>
+            </div>
+          </>
         ) : (
           <div className="text-center py-8 text-gray-500 border rounded-lg">
             No responses yet
