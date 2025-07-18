@@ -10,7 +10,7 @@ FeedbackFormRouter.route("/update-form/:formId").patch(
   IsAuthenticated,
   updateFeedbackForm
 );
-FeedbackFormRouter.route('/get-form/:formId').get(IsAuthenticated,getFeedbackForm)
+FeedbackFormRouter.route('/get-form/:formId').get(getFeedbackForm)
 FeedbackFormRouter.route("/get-all-forms").get(IsAuthenticated,getAdminFeedbackForms);
 FeedbackFormRouter.route("/:formId/analytics").get(IsAuthenticated,getFormAnalyticsForAdmin)
 FeedbackFormRouter.route('/delete-feedback/:formId').delete(IsAuthenticated,deleteFeedbackForm)

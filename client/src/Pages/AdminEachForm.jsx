@@ -158,7 +158,7 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
   if (!analyticsData) return <div className="p-4">No data found</div>;
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className="p-4 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <span className="flex gap-4">
           <Link to="/admin/dashboard">
@@ -204,8 +204,8 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
         </div>
       </div>
 
-      {/* Analytics Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6 mb-8">
         {analyticsData.analytics.map((question, index) => (
           <div key={index} className="border rounded-lg p-4 shadow-sm">
             <h3 className="font-medium mb-4">{question.questionText}</h3>
@@ -273,7 +273,7 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
           <h2 className="text-xl font-semibold mb-4">
             All Responses ({analyticsData.allResponses.length})
           </h2>
-          {analyticsData?.allResponses && (
+          {analyticsData?.allResponses>0 && (
             <Button
               onClick={() => {
                 exportResponsesToExcel(

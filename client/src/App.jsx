@@ -9,6 +9,7 @@ import appStore from "./store/store";
 import { Toaster } from "./components/ui/sonner";
 import ProtectedRoute from "./components/custom/ProtectedRoute";
 import AdminEachForm from "./Pages/AdminEachForm";
+import FormForUser from "./Pages/FormForUser";
 
 
 const App = () => {
@@ -20,6 +21,11 @@ const App = () => {
     {
       path: "/auth",
       element: <Auth />,
+    },
+    {
+path:"/form/:formId",
+element:<FormForUser/>
+
     },
     {
       path: "/admin",
