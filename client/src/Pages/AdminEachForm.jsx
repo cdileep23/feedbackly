@@ -21,7 +21,7 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Copy } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -89,7 +89,7 @@ const AdminEachForm = () => {
         );
         console.log(response.data.data);
         setAnalyticsData(response.data.data);
-        setIsFormActive(response.data.data.formDetails.isActive); // Initialize status state
+        setIsFormActive(response.data.data.formDetails.isActive); 
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch analytics");
       } finally {
@@ -147,7 +147,12 @@ const AdminEachForm = () => {
   if (loading) return <div className="flex justify-center p-8">Loading...</div>;
   if (error) return <div className="text-red-500 p-4">{error}</div>;
   if (!analyticsData) return <div className="p-4">No data found</div>;
+ const publicUrl = `https://feedbackly-sooty.vercel.app/form/${formId}`;
 
+ const copyToClipboard = () => {
+   navigator.clipboard.writeText(publicUrl);
+   toast.success("Public link copied to clipboard!");
+ };
   return (
     <div className="p-4 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -161,6 +166,10 @@ const AdminEachForm = () => {
         </span>
 
         <div className="flex gap-2">
+          <Button variant="outline" onClick={copyToClipboard}>
+            <Copy className="mr-2 h-4 w-4" />
+            Share Form
+          </Button>
           <Button variant="outline" onClick={toggleFormStatus}>
             {isFormActive ? "Deactivate" : "Activate"}
           </Button>
