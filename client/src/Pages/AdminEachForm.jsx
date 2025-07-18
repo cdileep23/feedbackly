@@ -26,14 +26,10 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-
-
- const exportResponsesToExcel = (allResponses,title) => {
+const exportResponsesToExcel = (allResponses, title) => {
   if (!allResponses || allResponses.length === 0) return;
 
-
   const questionHeaders = allResponses[0].answers.map((q) => q.questionText);
-
 
   const headers = ["Submitted By", "Submitted At", ...questionHeaders];
 
@@ -52,14 +48,11 @@ import { saveAs } from "file-saver";
     return [...base, ...answers];
   });
 
-
   const worksheetData = [headers, ...dataRows];
 
- 
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Responses");
-
 
   const excelBuffer = XLSX.write(workbook, {
     bookType: "xlsx",
@@ -73,18 +66,17 @@ import { saveAs } from "file-saver";
   saveAs(fileBlob, `${title}_Form_Responses.xlsx`);
 };
 
-
 const AdminEachForm = () => {
   const { formId } = useParams();
   const navigate = useNavigate();
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFormActive, setIsFormActive] = useState(false); 
-const[currentPage,setCurrentPage]=useState(1);
-const totalResponses = analyticsData?.allResponses.length;
-const limitPerPage=3;
-const NoOfPages = Math.ceil(totalResponses / limitPerPage);
+  const [isFormActive, setIsFormActive] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalResponses = analyticsData?.allResponses.length;
+  const limitPerPage = 5;
+  const NoOfPages = Math.ceil(totalResponses / limitPerPage);
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -121,7 +113,7 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
 
       if (res.data?.success) {
         toast.success(res.data?.message);
-        
+
         setAnalyticsData((prev) => ({
           ...prev,
           formDetails: {
@@ -131,7 +123,6 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
         }));
       }
     } catch (error) {
-  
       setIsFormActive(!isFormActive);
       toast.error(error.response?.data?.message || "Failed to update status");
       console.error(error);
@@ -158,7 +149,7 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
   if (!analyticsData) return <div className="p-4">No data found</div>;
 
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <div className="p-4 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <span className="flex gap-4">
           <Link to="/admin/dashboard">
@@ -204,8 +195,8 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
         </div>
       </div>
 
-    
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6 mb-8">
+      {/* Analytics Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {analyticsData.analytics.map((question, index) => (
           <div key={index} className="border rounded-lg p-4 shadow-sm">
             <h3 className="font-medium mb-4">{question.questionText}</h3>
@@ -273,7 +264,7 @@ const NoOfPages = Math.ceil(totalResponses / limitPerPage);
           <h2 className="text-xl font-semibold mb-4">
             All Responses ({analyticsData.allResponses.length})
           </h2>
-          {analyticsData?.allResponses>0 && (
+          {analyticsData?.allResponses && (
             <Button
               onClick={() => {
                 exportResponsesToExcel(
