@@ -4,10 +4,10 @@ import { createFeedbackForm, deleteFeedbackForm, getAdminFeedbackForms, getFeedb
 
 const FeedbackFormRouter=express.Router();
 
-FeedbackFormRouter.route("/create-form").post(IsAuthenticated,createFeedbackForm);
-FeedbackFormRouter.route("/update-status/:formId").patch(IsAuthenticated,toggleFeedbackFormStatus);
+FeedbackFormRouter.route("/create-form").post(IsAuthenticated,createFeedbackForm);//admin
+FeedbackFormRouter.route("/update-status/:formId").patch(IsAuthenticated,toggleFeedbackFormStatus);//admin
 
-FeedbackFormRouter.route('/get-form/:formId').get(getFeedbackForm)
+FeedbackFormRouter.route('/get-form/:formId').get(getFeedbackForm)//user
 FeedbackFormRouter.route("/get-all-forms").get(IsAuthenticated,getAdminFeedbackForms);
 FeedbackFormRouter.route("/:formId/analytics").get(IsAuthenticated,getFormAnalyticsForAdmin)
 FeedbackFormRouter.route('/delete-feedback/:formId').delete(IsAuthenticated,deleteFeedbackForm)
