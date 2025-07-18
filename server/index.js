@@ -13,8 +13,8 @@ app.use(cookieParser())
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
-    credentials:true
+    origin: ["http://localhost:5173", "https://feedbackly-sooty.vercel.app"],
+    credentials: true,
   })
 );
 app.use('/api/v1/admin', AdminRouter)
