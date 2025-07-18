@@ -1,5 +1,5 @@
 import FeedbackModel from "../models/feedback.model.js";
-import FeedbackResponseModel from '../models/feedbackresponse.model.js'
+import FeedbackResponseModel from "../models/feedbackresponse.model.js";
 import mongoose from "mongoose";
 const validateQuestionType = (questionType) => {
   const validTypes = ["text", "mcq", "yesno"];
@@ -122,8 +122,8 @@ const validateFormData = (formData) => {
 
 export const createFeedbackForm = async (req, res) => {
   try {
-    const {  title, description, questions, expiresAt } = req.body;
-const adminId=req.user.id
+    const { title, description, questions, expiresAt } = req.body;
+    const adminId = req.user.id;
     if (!adminId || !mongoose.Types.ObjectId.isValid(adminId)) {
       return res.status(400).json({
         success: false,
@@ -212,20 +212,17 @@ const adminId=req.user.id
   }
 };
 
-
 export const toggleFeedbackFormStatus = async (req, res) => {
   try {
     const { formId } = req.params;
     const { isActive } = req.body;
 
-  
     if (!formId || !mongoose.Types.ObjectId.isValid(formId)) {
       return res.status(400).json({
         success: false,
         message: "Valid form ID is required",
       });
     }
-
 
     if (typeof isActive !== "boolean") {
       return res.status(400).json({
@@ -234,7 +231,6 @@ export const toggleFeedbackFormStatus = async (req, res) => {
       });
     }
 
-   
     const feedbackForm = await FeedbackModel.findById(formId);
     if (!feedbackForm) {
       return res.status(404).json({
@@ -243,13 +239,14 @@ export const toggleFeedbackFormStatus = async (req, res) => {
       });
     }
 
- 
     feedbackForm.isActive = isActive;
     const updatedForm = await feedbackForm.save();
 
     res.status(200).json({
       success: true,
-      message: `Feedback form ${isActive ? "activated" : "closed"} successfully`,
+      message: `Feedback form ${
+        isActive ? "activated" : "closed"
+      } successfully`,
       data: {
         formId: updatedForm._id,
         title: updatedForm.title,
@@ -266,12 +263,6 @@ export const toggleFeedbackFormStatus = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-
 
 export const getFeedbackForm = async (req, res) => {
   try {
@@ -327,7 +318,7 @@ export const getAdminFeedbackForms = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .select("_id title description isActive createdAt"); 
+      .select("_id title description isActive createdAt");
 
     const totalCount = await FeedbackModel.countDocuments(query);
 
@@ -474,7 +465,7 @@ export const getFormAnalyticsForAdmin = async (req, res) => {
 export const deleteFeedbackForm = async (req, res) => {
   try {
     const { formId } = req.params;
-    const userId = req.user?.id; 
+    const userId = req.user?.id;
 
     if (!formId || !mongoose.Types.ObjectId.isValid(formId)) {
       return res.status(400).json({
