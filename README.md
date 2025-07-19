@@ -12,18 +12,7 @@ Authentication: JWT
 
 Deployment-ready structure
 
-📁 Project Structure
 
-feedbackly/
-│
-├── client/                 # Frontend (React + Vite)
-├── server/                 # Backend (Express + MongoDB)
-│   ├── models/             # Mongoose models (Admin, FeedbackForm, FeedbackResponse)
-│   ├── routes/             # API endpoints
-│   ├── controllers/        # Business logic
-│   ├── middleware/         # Auth and validation
-│   └── index.js            # Entry point
-└── README.md
 
 | Route                 | Component        | Access      | Description                                         |
 | --------------------- | ---------------- | ----------- | --------------------------------------------------- |
@@ -40,17 +29,22 @@ feedbackly/
 1. Clone the Repository
 
 git clone https://github.com/cdileep23/feedbackly.git
+
 cd feedbackly
 
 
 2. Setup the Server (Backend)
 
 cd server
+
 npm install
+
 ✅ Create a .env file with the following:
 
 PORT=5000
+
 MONGODB_URI=your_mongo_connection_string
+
 JWT_SECRET=your_secret_key
 
 //I have shared my env values in the form
@@ -60,12 +54,15 @@ Then run the server:
 
 
 npm run dev
+
 Server runs on http://localhost:5000
 
 3. Setup the Client (Frontend)
 
 cd ../client
+
 npm install
+
 npm run dev
 
 Client runs on http://localhost:5173
