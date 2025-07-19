@@ -1,6 +1,9 @@
 🗳️ Feedbackly
 A modern full-stack feedback form platform that allows admins to create custom feedback forms and collect responses efficiently with Access to form via a public URL .
 
+> Live Demo: [https://feedbackly-sooty.vercel.app/](https://feedbackly-sooty.vercel.app/)  
+> GitHub Repo: [https://github.com/cdileep23/feedbackly](https://github.com/cdileep23/feedbackly)
+
 🚀 Tech Stack
 Frontend: React.js (with Vite), Shadcn Ui, Tailwind css
 
